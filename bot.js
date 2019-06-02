@@ -38,20 +38,31 @@ const isNumber = (number, callback) => {
   if (platePattern.test(number)) { callback(null, number) }
   else callback("זה לא מספר של רכב", null);
 }
-const fileUpload = function (local_file_path) {
-  console.log('trying to upload the file ',local_file_path)
+const fileUpload = function (local_file_path, callback) {
   const fileName = local_file_path.split('/').pop();
-  const uploadedFilePath = `data://.session/${fileName}`
-  const directory = 'data://.session'
+  const uploadedFilePath = `data://.algo/marcemile/license_plate_recognition_ALPR/temp/${fileName}`
+  const directory = algorithmia_client.dir('data://.algo/marcemile/license_plate_recognition_ALPR/temp')
 
   algorithmia_client.file(uploadedFilePath).exists(function (exists) {
     if (!exists) {
-      directory.putFile(local_file_path, function(response){
-        if(response.error){
-          console.log('fail to upload file '+local_file_path)
+      directory.putFile(local_file_path, function (response) {
+        if (response.error) {
+          console.log('fail to upload file ' + local_file_path)
         }
-        else{
-          console.log('file successfully uploaded');
+        else {
+          console.log(response.result);
+          algorithmia.client(algorithmia_key)
+            .algo("marcemile/license_plate_recognition_ALPR/0.1.1?timeout=300")
+            .pipe(response.result)
+            .then(function (response) {
+              const output = response.result.results
+              const score = output[0].score
+              const plate = output[0].plate
+              if (score < 0.5) console.log('cannot detect the plate number')
+              else {
+                callback(plate)
+              }
+            })
         }
       })
     }
@@ -61,32 +72,39 @@ const fileUpload = function (local_file_path) {
 // data://.session/:filename// temoporary files here
 
 bot.on('message', (msg) => {
+  let number;
   if (msg.photo) {
     const photo = msg.photo;
     const fileId = photo[2].file_id;
 
     bot.downloadFile(fileId, __dirname + '/images/')
-      .then(path => fileUpload(path))
+      .then(path => fileUpload(path, number => sendReply(number,msg.chat.id)))// has to be promise
       .catch(err => console.log(err))
   }
   else if (msg.text) {
-    const number = msg.text;
-    let reply;
-    isNumber(number, function (err, number) {
-      if (err) bot.sendMessage(msg.chat.id, err).catch(err => console.log(err))
-      else {
-        const collection = myDB.collection('tavim')
-        const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
-          if (result) reply = `לרכב ${number} *יש* תו חניה נכה`
-          else reply = `לרכב ${number} *אין* תו חניה נכה`
-          bot.sendMessage(msg.chat.id, reply, { parse_mode: 'Markdown' })
-        }).catch(err => console.log(err))
-      }
-    })
+    number = msg.text;
+    console.log(msg)
+    sendReply(number,msg.chat.id);
+
   }
   else {
     console.log('כדי להשתמש בבוט תזין בבקשה מספר רכב או תעלה תמונה')
   }
 });
+
+const sendReply = function (number,chat_id) {
+  let reply;
+  isNumber(number, function (err, number) {
+    if (err) bot.sendMessage(msg.chat.id, err).catch(err => console.log(err))
+    else {
+      const collection = myDB.collection('tavim')
+      const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
+        if (result) reply = `✅ לרכב ${number} *יש* תו חניה נכה `
+        else reply = ` ❌ לרכב ${number} *אין* תו חניה נכה `
+        bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
+      }).catch(err => console.log(err))
+    }
+  })
+}
 
 module.exports = bot;
