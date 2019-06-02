@@ -47,7 +47,7 @@ const fileUpload = function (local_file_path, callback) {
     if (!exists) {
       directory.putFile(local_file_path, function (response) {
         if (response.error) {
-          console.log(response);
+          //console.log(response);
           console.log('fail to upload file ' + local_file_path)
         }
         else {
@@ -76,7 +76,7 @@ bot.on('message', (msg) => {
     const photo = msg.photo;
     const fileId = photo[2].file_id;
 
-    console.log(photo);
+   // console.log(photo);
     bot.downloadFile(fileId, __dirname + '/images/')
       .then(path => fileUpload(path, number => sendReply(number, msg.chat.id)))// has to be promise
       .catch(err => console.log(err))
@@ -92,7 +92,11 @@ bot.on('message', (msg) => {
 
 const sendReply = function (number, chat_id) {
   let reply;
-  if (number == 0) reply = 'לא מצליח לזהות מספר בתמונה'
+  console.log(number)
+  if (number == 0) {
+    reply = 'לא מצליח לזהות מספר בתמונה';
+    bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
+  }
   else {
     isNumber(number, function (err, number) {
       if (err) bot.sendMessage(msg.chat.id, err).catch(err => console.log(err))
