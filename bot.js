@@ -76,15 +76,14 @@ bot.on('message', (msg) => {
   if (msg.photo) {
     const photo = msg.photo;
     const fileId = photo[2].file_id;
-
+    console.log('trying to recognize the number')
     bot.downloadFile(fileId, __dirname + '/images/')
-      .then(path => fileUpload(path, number => sendReply(number,msg.chat.id)))// has to be promise
+      .then(path => fileUpload(path, number => sendReply(number, msg.chat.id)))// has to be promise
       .catch(err => console.log(err))
   }
   else if (msg.text) {
     number = msg.text;
-    console.log(msg)
-    sendReply(number,msg.chat.id);
+    sendReply(number, msg.chat.id);
 
   }
   else {
@@ -92,15 +91,23 @@ bot.on('message', (msg) => {
   }
 });
 
-const sendReply = function (number,chat_id) {
+const sendReply = function (number, chat_id) {
   let reply;
   isNumber(number, function (err, number) {
     if (err) bot.sendMessage(msg.chat.id, err).catch(err => console.log(err))
     else {
       const collection = myDB.collection('tavim')
       const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
+        let plate_pattern = number.toString();
+        
+        switch (plate_pattern.length) {
+          case 7: plate_pattern = plate_pattern.slice(0,2) + '-' + plate_pattern.slice(2,5)+'-'+plate_pattern.slice(5)
+          case 8: plate_pattern = plate_pattern.slice(0, 3) + '-'+ plate_pattern.slice(3-5)+'-'+plate_pattern.slice(5)
+        }
+
+
         if (result) reply = `✅ לרכב ${number} *יש* תו חניה נכה `
-        else reply = ` ❌ לרכב ${number} *אין* תו חניה נכה `
+        else reply = ` ❌ לרכב ${plate_pattern} *אין* תו חניה נכה `
         bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
       }).catch(err => console.log(err))
     }
