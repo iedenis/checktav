@@ -59,7 +59,7 @@ const fileUpload = function (local_file_path, callback) {
               const output = response.result.results
               const score = output[0].score
               const plate = output[0].plate
-              if (score < 0.5) console.log('cannot detect the plate number')
+              if (score < 0.5) callback(0)
               else {
                 callback(plate)
               }
@@ -68,8 +68,8 @@ const fileUpload = function (local_file_path, callback) {
       })
     }
   })
-
 }
+
 bot.on('message', (msg) => {
   let number;
   if (msg.photo) {
@@ -92,25 +92,28 @@ bot.on('message', (msg) => {
 
 const sendReply = function (number, chat_id) {
   let reply;
-  isNumber(number, function (err, number) {
-    if (err) bot.sendMessage(msg.chat.id, err).catch(err => console.log(err))
-    else {
-      const collection = myDB.collection('tavim')
-      const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
-        let plate_pattern = number.toString();
+  if (number == 0) reply = 'לא מצליח לזהות מספר בתמונה'
+  else {
+    isNumber(number, function (err, number) {
+      if (err) bot.sendMessage(msg.chat.id, err).catch(err => console.log(err))
+      else {
+        const collection = myDB.collection('tavim')
+        const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
+          let plate_pattern = number.toString();
 
-        switch (plate_pattern.length) {
-          case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5);break;
-          case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3 - 5) + '-' + plate_pattern.slice(5);break
-        }
+          switch (plate_pattern.length) {
+            case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5); break;
+            case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3 - 5) + '-' + plate_pattern.slice(5); break
+          }
 
-        console.log(plate_pattern)
-        if (result) reply = `✅ לרכב ${number} *יש* תו חניה נכה `
-        else reply = ` ❌ לרכב ${plate_pattern} *אין* תו חניה נכה `
-        bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
-      }).catch(err => console.log(err))
-    }
-  })
+          console.log(plate_pattern)
+          if (result) reply = `✅ לרכב ${number} *יש* תו חניה נכה `
+          else reply = ` ❌ לרכב ${plate_pattern} *אין* תו חניה נכה `
+          bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
+        }).catch(err => console.log(err))
+      }
+    })
+  }
 }
 
 module.exports = bot;
