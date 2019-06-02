@@ -76,7 +76,8 @@ bot.on('message', (msg) => {
   if (msg.photo) {
     const photo = msg.photo;
     const fileId = photo[2].file_id;
-    console.log('trying to recognize the number')
+
+    console.log(photo);
     bot.downloadFile(fileId, __dirname + '/images/')
       .then(path => fileUpload(path, number => sendReply(number, msg.chat.id)))// has to be promise
       .catch(err => console.log(err))
@@ -84,7 +85,6 @@ bot.on('message', (msg) => {
   else if (msg.text) {
     number = msg.text;
     sendReply(number, msg.chat.id);
-
   }
   else {
     console.log('כדי להשתמש בבוט תזין בבקשה מספר רכב או תעלה תמונה')
@@ -99,13 +99,13 @@ const sendReply = function (number, chat_id) {
       const collection = myDB.collection('tavim')
       const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
         let plate_pattern = number.toString();
-        
+
         switch (plate_pattern.length) {
-          case 7: plate_pattern = plate_pattern.slice(0,2) + '-' + plate_pattern.slice(2,5)+'-'+plate_pattern.slice(5)
-          case 8: plate_pattern = plate_pattern.slice(0, 3) + '-'+ plate_pattern.slice(3-5)+'-'+plate_pattern.slice(5)
+          case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5);break;
+          case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3 - 5) + '-' + plate_pattern.slice(5);break
         }
 
-
+        console.log(plate_pattern)
         if (result) reply = `✅ לרכב ${number} *יש* תו חניה נכה `
         else reply = ` ❌ לרכב ${plate_pattern} *אין* תו חניה נכה `
         bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
