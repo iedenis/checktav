@@ -47,6 +47,7 @@ const fileUpload = function (local_file_path, callback) {
     if (!exists) {
       directory.putFile(local_file_path, function (response) {
         if (response.error) {
+          console.log(response);
           console.log('fail to upload file ' + local_file_path)
         }
         else {
@@ -69,8 +70,6 @@ const fileUpload = function (local_file_path, callback) {
   })
 
 }
-// data://.session/:filename// temoporary files here
-
 bot.on('message', (msg) => {
   let number;
   if (msg.photo) {
