@@ -107,7 +107,8 @@ const sendReply = function (number, chat_id) {
 
           switch (plate_pattern.length) {
             case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5); break;
-            case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3 - 5) + '-' + plate_pattern.slice(5); break
+            case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3 , 5) + '-' + plate_pattern.slice(5); break;
+            default: break;
           }
 
           console.log(plate_pattern)
