@@ -112,7 +112,7 @@ const sendReply = function (number, chat_id) {
           }
 
           console.log(plate_pattern)
-          if (result) reply = `✅ לרכב ${number} *יש* תו חניה נכה `
+          if (result) reply = `✅ לרכב ${plate_pattern} *יש* תו חניה נכה `
           else reply = ` ❌ לרכב ${plate_pattern} *אין* תו חניה נכה `
           bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
         }).catch(err => console.log(err))
