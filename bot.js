@@ -56,13 +56,20 @@ const fileUpload = function (local_file_path, callback) {
             .algo("marcemile/license_plate_recognition_ALPR/0.1.1?timeout=300")
             .pipe(response.result)
             .then(function (response) {
-              const output = response.result.results
-              const score = output[0].score
-              const plate = output[0].plate
-              if (score < 0.5) callback(0)
-              else {
-                callback(plate)
+              if (response.error||response.result.results.length===0) {
+                callback(0)
               }
+              else {
+                console.log(JSON.stringify(response));
+                const output = response.result.results
+                const score = output[0].score
+                const plate = output[0].plate
+                if (score < 0.5) callback(1)
+                else {
+                  callback(plate)
+                }
+              }
+
             })
         }
       })
@@ -76,7 +83,7 @@ bot.on('message', (msg) => {
     const photo = msg.photo;
     const fileId = photo[2].file_id;
 
-   // console.log(photo);
+    // console.log(photo);
     bot.downloadFile(fileId, __dirname + '/images/')
       .then(path => fileUpload(path, number => sendReply(number, msg.chat.id)))// has to be promise
       .catch(err => console.log(err))
@@ -92,10 +99,14 @@ bot.on('message', (msg) => {
 
 const sendReply = function (number, chat_id) {
   let reply;
-  console.log(number)
+  // console.log(number)
   if (number == 0) {
     reply = 'לא מצליח לזהות מספר בתמונה';
     bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
+  }
+  else if(number ===1){
+    reply='המספר לא נראה ברור'
+    bot.sendMessage(chat_id,reply, {parse_mode: 'Markdown'})
   }
   else {
     isNumber(number, function (err, number) {
@@ -107,11 +118,10 @@ const sendReply = function (number, chat_id) {
 
           switch (plate_pattern.length) {
             case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5); break;
-            case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3 , 5) + '-' + plate_pattern.slice(5); break;
+            case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3, 5) + '-' + plate_pattern.slice(5); break;
             default: break;
           }
 
-          console.log(plate_pattern)
           if (result) reply = `✅ לרכב ${plate_pattern} *יש* תו חניה נכה `
           else reply = ` ❌ לרכב ${plate_pattern} *אין* תו חניה נכה `
           bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
