@@ -110,7 +110,7 @@ const sendReply = function (number, chat_id) {
   }
   else {
     isNumber(number, function (err, number) {
-      if (err) bot.sendMessage(chat_id, err).catch(err => console.log(err))
+      if (err) bot.sendMessage(chat_id, 'לא מצליח לזהות מספר בתמונה. תנסה שוב.').catch(err => console.log(err))
       else {
         const collection = myDB.collection('tavim')
         const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
