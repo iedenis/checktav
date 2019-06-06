@@ -19,7 +19,7 @@ else {
   bot = new Bot(token, { polling: true });
 }
 
-console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
+//console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = `mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/test?retryWrites=true`;
@@ -89,7 +89,7 @@ bot.on('message', (msg) => {
     sendReply(number, msg.chat.id);
   }
   else {
-    console.log('כדי להשתמש בבוט תזין בבקשה מספר רכב או תעלה תמונה')
+    bot.sendMessage(msg.chat.id, 'כדי להשתמש בבוט תזין בבקשה מספר רכב או תעלה תמונה')
   }
 });
 
