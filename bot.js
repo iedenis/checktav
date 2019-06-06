@@ -56,7 +56,7 @@ const fileUpload = function (local_file_path, callback) {
             .algo("marcemile/license_plate_recognition_ALPR/0.1.1?timeout=300")
             .pipe(response.result)
             .then(function (response) {
-              if (response.error||response.result.results.length===0) {
+              if (response.error || response.result.results.length === 0) {
                 callback(0)
               }
               else {
@@ -104,13 +104,15 @@ const sendReply = function (number, chat_id) {
     reply = 'לא מצליח לזהות מספר בתמונה';
     bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
   }
-  else if(number ===1){
-    reply='המספר לא נראה ברור'
-    bot.sendMessage(chat_id,reply, {parse_mode: 'Markdown'})
+  else if (number === 1) {
+    reply = 'המספר לא נראה ברור'
+    bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
   }
   else {
     isNumber(number, function (err, number) {
-      if (err) bot.sendMessage(chat_id, 'לא מצליח לזהות מספר בתמונה. תנסה שוב.').catch(err => console.log(err))
+      if (err) {
+        bot.sendMessage(chat_id, 'לא מצליח לזהות מספר. תנסה שוב.').catch(err => console.log(err))
+      }
       else {
         const collection = myDB.collection('tavim')
         const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
