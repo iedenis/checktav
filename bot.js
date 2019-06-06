@@ -34,7 +34,6 @@ client.connect((err, database) => {
 
 const isNumber = (number, callback) => {
   const platePattern = /^([0-9]{2}-[0-9]{3}-[0-9]{2}|[0-9]{3}-[0-9]{2}-[0-9]{3}|[0-9]{5,8}|[0-9]{3}-[0-9]{3})$/
-  //console.log(platePattern.test(number))
   if (platePattern.test(number)) { callback(null, number) }
   else callback("זה לא מספר של רכב", null);
 }
@@ -47,7 +46,6 @@ const fileUpload = function (local_file_path, callback) {
     if (!exists) {
       directory.putFile(local_file_path, function (response) {
         if (response.error) {
-          //console.log(response);
           console.log('fail to upload file ' + local_file_path)
         }
         else {
@@ -69,7 +67,6 @@ const fileUpload = function (local_file_path, callback) {
                   callback(plate)
                 }
               }
-
             })
         }
       })
@@ -83,9 +80,8 @@ bot.on('message', (msg) => {
     const photo = msg.photo;
     const fileId = photo[2].file_id;
 
-    // console.log(photo);
     bot.downloadFile(fileId, __dirname + '/images/')
-      .then(path => fileUpload(path, number => sendReply(number, msg.chat.id)))// has to be promise
+      .then(path => fileUpload(path, number => sendReply(number, msg.chat.id)))
       .catch(err => console.log(err))
   }
   else if (msg.text) {
@@ -99,7 +95,6 @@ bot.on('message', (msg) => {
 
 const sendReply = function (number, chat_id) {
   let reply;
-  // console.log(number)
   if (number == 0) {
     reply = 'לא מצליח לזהות מספר בתמונה';
     bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
@@ -119,6 +114,7 @@ const sendReply = function (number, chat_id) {
           let plate_pattern = number.toString();
 
           switch (plate_pattern.length) {
+            case 6: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3)
             case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5); break;
             case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3, 5) + '-' + plate_pattern.slice(5); break;
             default: break;
