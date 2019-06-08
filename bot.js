@@ -180,6 +180,6 @@ setInterval(function () {
     .then(() => updateDataBase())
     .catch(err => console.log('error while downloading', err))
   // http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV
-}, 5000); //86400000 milliseconds for 24 hours.
+}, 86400000000); //86400000 milliseconds for 24 hours.
 
 module.exports = bot;
