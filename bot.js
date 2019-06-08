@@ -137,9 +137,10 @@ const sendReply = function (number, chat_id) {
 }
 
 const downloadCSV = function (url, dest) {
+  // console.log('trying to save file to '+dest)
   var file = fs.createWriteStream(dest);
   return new Promise((resolve, reject) => {
-    var responseSent = false; // flag to make sure that response is sent only once.
+    var responseSent = false;
     http.get(url, response => {
       response.pipe(file);
       file.on('finish', () => {
@@ -161,9 +162,7 @@ const downloadCSV = function (url, dest) {
 
 const updateDataBase = function () {
   let { exec } = require('child_process');
-  let command = `mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection tavim --type csv --file ./temp/RECHEV-NACHIM.CSV --headerline`
-  //let command = `mongoimport --uri mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/
-  //-d test -c tavim --type csv --file  ./temp/RECHEV-NACHIM.CSV --headerline`
+  let command = `mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection tavim --type csv --file /temp/RECHEV-NACHIM.CSV --headerline`
 
   exec(command, (err, stdout, stderr) => {
     console.log('updating the database...')
@@ -176,12 +175,13 @@ const updateDataBase = function () {
     }
   })
 }
+downloadCSV('http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV', `${__dirname}/temp/RECHEV-NACHIM.CSV`).then(res => console.log('The file saved')).catch(err => console.log('error while downloading file ', err))
 
-setInterval(function () {
-  downloadCSV('http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV', './temp/RECHEV-NACHIM.CSV')
+/*setInterval(function () {
+  downloadCSV('http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV', `${__dirname}/temp/RECHEV-NACHIM.CSV`)
     .then(() => updateDataBase())
     .catch(err => console.log('error while downloading', err))
   // http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV
 }, 86400000000); //86400000 milliseconds for 24 hours.
-
+*/
 module.exports = bot;
