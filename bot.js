@@ -121,7 +121,7 @@ const sendReply = function (number, chat_id) {
           let plate_pattern = number.toString();
 
           switch (plate_pattern.length) {
-            case 6: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3)
+            case 6: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3); break;
             case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5); break;
             case 8: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3, 5) + '-' + plate_pattern.slice(5); break;
             default: break;
@@ -159,7 +159,9 @@ const downloadCSV = function (url, dest) {
 
 const updateDataBase = function () {
   let { exec } = require('child_process');
-  let command = 'mongoimport -d cars -c tavim --type csv --file  ./temp/RECHEV-NACHIM.CSV --headerline'
+  let command = `mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection cars --type csv --file ./temp/RECHEV-NACHIM.CSV --headerline`
+  //let command = `mongoimport --uri mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/
+  //-d test -c tavim --type csv --file  ./temp/RECHEV-NACHIM.CSV --headerline`
 
   exec(command, (err, stdout, stderr) => {
     console.log('updating the database...')
