@@ -6,12 +6,16 @@ const algorithmia_key = process.env.ALGORITHMIA_KEY;
 const Bot = require('node-telegram-bot-api');
 const algorithmia = require("algorithmia");
 const algorithmia_client = algorithmia(algorithmia_key);
+const fs = require('fs')
+const http = require('http');
 
 let bot;
 let myDB;
+//let uri;
 
+const productionMode = process.env.NODE_ENV === 'production' ? 1 : 0
 
-if (process.env.NODE_ENV === 'production') {
+if (productionMode) {
   bot = new Bot(token);
   bot.setWebHook(process.env.HEROKU_URL + bot.token);
 }
@@ -22,7 +26,10 @@ else {
 //console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = `mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/test?retryWrites=true`;
+
+const uri = productionMode ?
+  `mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/test?retryWrites=true` :
+  'mongodb://localhost:27017/cars';
 
 const client = new MongoClient(uri, { useNewUrlParser: true });
 client.connect((err, database) => {
@@ -128,5 +135,49 @@ const sendReply = function (number, chat_id) {
     })
   }
 }
+
+const downloadCSV = function (url, dest) {
+  var file = fs.createWriteStream(dest);
+  return new Promise((resolve, reject) => {
+    var responseSent = false; // flag to make sure that response is sent only once.
+    http.get(url, response => {
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close(() => {
+          if (responseSent) return;
+          responseSent = true;
+          resolve();
+        });
+      });
+    }).on('error', err => {
+      if (responseSent) return;
+      responseSent = true;
+      reject(err);
+    });
+  });
+}
+
+const updateDataBase = function () {
+  let { exec } = require('child_process');
+  let command = 'mongoimport -d cars -c tavim --type csv --file  ./temp/RECHEV-NACHIM.CSV --headerline'
+
+  exec(command, (err, stdout, stderr) => {
+    console.log('updating the database...')
+    if (err) {
+      console.log(err);
+      return;
+    }
+    else {
+      console.log(stderr);
+    }
+  })
+}
+
+setInterval(function () {
+  downloadCSV('http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV', './temp/RECHEV-NACHIM.CSV')
+    .then(() => updateDataBase())
+    .catch(err => console.log('error while downloading', err))
+  // http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV
+}, 86400000); //86400000 milliseconds for 24 hours.
 
 module.exports = bot;
