@@ -161,7 +161,7 @@ const downloadCSV = function (url, dest) {
 
 const updateDataBase = function () {
   let { exec } = require('child_process');
-  let command = `mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection cars --type csv --file ./temp/RECHEV-NACHIM.CSV --headerline`
+  let command = `mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection tavim --type csv --file ./temp/RECHEV-NACHIM.CSV --headerline`
   //let command = `mongoimport --uri mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/
   //-d test -c tavim --type csv --file  ./temp/RECHEV-NACHIM.CSV --headerline`
 
