@@ -143,6 +143,7 @@ const downloadCSV = function (url, dest) {
     http.get(url, response => {
       response.pipe(file);
       file.on('finish', () => {
+        console.log('downloaded')
         file.close(() => {
           if (responseSent) return;
           responseSent = true;
@@ -150,6 +151,7 @@ const downloadCSV = function (url, dest) {
         });
       });
     }).on('error', err => {
+      console.log(err)
       if (responseSent) return;
       responseSent = true;
       reject(err);
