@@ -28,7 +28,8 @@ else {
 const MongoClient = require('mongodb').MongoClient;
 
 const uri = productionMode ?
-  `mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/test?retryWrites=true` :
+`mongodb://${dbun}:${dbp}@ds111258.mlab.com:11258/cars`:
+  //`mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/test?retryWrites=true` :
   'mongodb://localhost:27017/cars';
 
 const client = new MongoClient(uri, { useNewUrlParser: true });
@@ -137,14 +138,12 @@ const sendReply = function (number, chat_id) {
 }
 
 const downloadCSV = function (url, dest) {
-  // console.log('trying to save file to '+dest)
   var file = fs.createWriteStream(dest);
   return new Promise((resolve, reject) => {
     var responseSent = false;
     http.get(url, response => {
       response.pipe(file);
       file.on('finish', () => {
-        //console.log('downloaded')
         file.close(() => {
           if (responseSent) return;
           responseSent = true;
@@ -182,15 +181,11 @@ const updateDataBase = function () {
   });
 }
 
-downloadCSV('http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV', `${__dirname}/temp/RECHEV-NACHIM.CSV`)
-  .then(() => updateDataBase())
-  .catch(err => console.log('error while downloading', err))
-
-/*setInterval(function () {
+setInterval(function () {
   downloadCSV('http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV', `${__dirname}/temp/RECHEV-NACHIM.CSV`)
-    .then(() => updateDataBase())
-    .catch(err => console.log('error while downloading', err))
+  .then(() => updateDataBase())
+  .catch(err => console.log('error while updating the database', err))
   // http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV
 }, 86400000); //86400000 milliseconds for 24 hours.
-*/
+
 module.exports = bot;
