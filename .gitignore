@@ -1,5 +1,6 @@
 
 node_modules/*
+vendor/*
 # Heroku environment configuration
 .env
 env.cmd

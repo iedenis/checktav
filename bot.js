@@ -144,7 +144,7 @@ const downloadCSV = function (url, dest) {
     http.get(url, response => {
       response.pipe(file);
       file.on('finish', () => {
-        console.log('downloaded')
+        //console.log('downloaded')
         file.close(() => {
           if (responseSent) return;
           responseSent = true;
@@ -166,8 +166,9 @@ const updateDataBase = function () {
   fs.access(file_path, fs.constants.F_OK, (err) => {
     if (err) console.log(err);
     else {
-      let command = `mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection tavim --type csv --file ${file_path} --headerline`
-      exec(command, (err, stdout, stderr) => {
+     // let command = `./vendor/mongoimport/mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection tavim --type csv --file ${file_path} --headerline`
+     let command = `./vendor/mongoimport/mongoimport -h ds111258.mlab.com:11258 -d cars -c nechim -u ${dbun} -p ${dbp} --file /home/fox/Desktop/RECHEV-NACHIM.CSV --type csv --headerline` 
+     exec(command, (err, stdout, stderr) => {
         console.log('updating the database...')
         if (err) {
           console.log(err);
