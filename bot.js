@@ -11,7 +11,6 @@ const http = require('http');
 
 let bot;
 let myDB;
-//let uri;
 
 const productionMode = process.env.NODE_ENV === 'production' ? 1 : 0
 
@@ -23,18 +22,14 @@ else {
   bot = new Bot(token, { polling: true });
 }
 
-//console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
-
 const MongoClient = require('mongodb').MongoClient;
 
-const uri = productionMode ?
-`mongodb://${dbun}:${dbp}@ds111258.mlab.com:11258/cars`:
-  //`mongodb+srv://${dbun}:${dbp}@cluster0-8tttz.mongodb.net/test?retryWrites=true` :
-  'mongodb://localhost:27017/cars';
+const uri =`mongodb://${dbun}:${dbp}@ds111258.mlab.com:11258/cars`
 
 const client = new MongoClient(uri, { useNewUrlParser: true });
+
 client.connect((err, database) => {
-  if (err) console.log(err);
+  if (err) console.log('Cannot connect to the database', err);
   else {
     myDB = database.db("cars");
   }
@@ -117,10 +112,11 @@ const sendReply = function (number, chat_id) {
         bot.sendMessage(chat_id, 'לא מצליח לזהות מספר. תנסה שוב.').catch(err => console.log(err))
       }
       else {
-        const collection = myDB.collection('tavim')
-        const retval = collection.findOne({ "MISPAR RECHEV": number }).then(function (result) {
-          let plate_pattern = number.toString();
+        const collection = myDB.collection('nechim')
 
+        const retval = collection.findOne({ "00019776;20181112;01": { $regex: `.*${number}` } }).then(function (result) {
+
+          let plate_pattern = number.toString();
           switch (plate_pattern.length) {
             case 6: plate_pattern = plate_pattern.slice(0, 3) + '-' + plate_pattern.slice(3); break;
             case 7: plate_pattern = plate_pattern.slice(0, 2) + '-' + plate_pattern.slice(2, 5) + '-' + plate_pattern.slice(5); break;
@@ -131,7 +127,7 @@ const sendReply = function (number, chat_id) {
           if (result) reply = `✅ לרכב ${plate_pattern} *יש* תו חניה נכה `
           else reply = ` ❌ לרכב ${plate_pattern} *אין* תו חניה נכה `
           bot.sendMessage(chat_id, reply, { parse_mode: 'Markdown' })
-        }).catch(err => console.log(err))
+        }).catch(err => console.log('Cannot fetch data from database', err))
       }
     })
   }
@@ -165,9 +161,9 @@ const updateDataBase = function () {
   fs.access(file_path, fs.constants.F_OK, (err) => {
     if (err) console.log(err);
     else {
-     // let command = `./vendor/mongoimport/mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection tavim --type csv --file ${file_path} --headerline`
-     let command = `./vendor/mongoimport/mongoimport -h ds111258.mlab.com:11258 -d cars -c nechim -u ${dbun} -p ${dbp} --file ${file_path} --type csv --headerline` 
-     exec(command, (err, stdout, stderr) => {
+      // let command = `./vendor/mongoimport/mongoimport --host Cluster0-shard-0/cluster0-shard-00-00-8tttz.mongodb.net:27017,cluster0-shard-00-01-8tttz.mongodb.net:27017,cluster0-shard-00-02-8tttz.mongodb.net:27017 --ssl --username ${dbun} --password ${dbp} --authenticationDatabase admin --db test --collection tavim --type csv --file ${file_path} --headerline`
+      let command = `./vendor/mongoimport/mongoimport -h ds111258.mlab.com:11258 -d cars -c nechim --drop -u ${dbun} -p ${dbp} --file ${file_path} --type csv --headerline`
+      exec(command, (err, stdout, stderr) => {
         console.log('updating the database...')
         if (err) {
           console.log(err);
@@ -183,8 +179,8 @@ const updateDataBase = function () {
 
 setInterval(function () {
   downloadCSV('http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV', `${__dirname}/temp/RECHEV-NACHIM.CSV`)
-  .then(() => updateDataBase())
-  .catch(err => console.log('error while updating the database', err))
+    .then(() => updateDataBase())
+    .catch(err => console.log('error while updating the database', err))
   // http://rishuy.mot.gov.il/download.php?f=RECHEV-NACHIM.CSV
 }, 86400000); //86400000 milliseconds for 24 hours.
 
