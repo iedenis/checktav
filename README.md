@@ -9,3 +9,5 @@ This is a telegram bot that can check if there is a car that belongs to disable 
 | 1 | 2 | 3 |
 | :---:         |     :---:      |          :---: |
 | ![](https://i.imgur.com/gzBamlq.jpg)  | ![](https://i.imgur.com/gAKCjjo.jpg)     | ![](https://i.imgur.com/4alTskB.jpg)|
+
+[![Algorithmia](https://algorithmia.com/versioned/images/algo-purple.svg)](https://algorithmia.com/algorithms/marcemile/license_plate_recognition_ALPR)
