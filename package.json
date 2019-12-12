@@ -1,14 +1,14 @@
 {
   "name": "heroku-node-telegram-bot",
   "version": "1.0.3",
-  "description": "Starter pack for running telegram bot on the Heroku using Node.js",
+  "description": "Bot that checks if there is a disabled parking permit by license plate number",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js",
     "switch_to_dev": "export $(cat .env | xargs) && wget --spider https://api.telegram.org/bot$TOKEN/setWebhook?url= --delete-after && node index.js"
   },
-  "author": "Volodymyr Lut",
+  "author": "Denis Ievlev",
   "license": "ISC",
   "dependencies": {
     "algorithmia": "^0.3.10",
